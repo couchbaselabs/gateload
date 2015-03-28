@@ -78,12 +78,19 @@ func main() {
 	}
 
 	// wait for all the workers to finish
+	log.Printf("wait for all the workers to finish")
 	adminWg.Wait()
+	log.Printf("/wait for all the workers to finish")
+
 	// close the pending users channel to free that routine
+	log.Printf("close the pending users channel to free that routine")
 	close(pendingUsers)
+	log.Printf("/close the pending users channel to free that routine")
 
 	numChannels := (config.NumPullers + config.NumPushers) / config.ChannelActiveUsers
 	channelRampUpDelayMs := time.Duration(config.RampUpIntervalMs/numChannels) * time.Millisecond
+
+	log.Printf("channelRampUpDelayMs: %v. loop over %v users", channelRampUpDelayMs, len(users))
 
 	wg := sync.WaitGroup{}
 	channel := ""
@@ -91,20 +98,27 @@ func main() {
 		nextChannel := user.Channel
 		if channel != nextChannel {
 			if channel != "" {
+				log.Printf("Sleeping %v", channelRampUpDelayMs)
 				time.Sleep(channelRampUpDelayMs)
+				log.Printf("/Sleeping %v", channelRampUpDelayMs)
 			}
 			channel = nextChannel
 		}
 		wg := sync.WaitGroup{}
+
+		log.Printf("go runUser with user: %v", user)
 		go runUser(user, config, &wg)
 		wg.Add(1)
 	}
 
 	if config.RunTimeMs > 0 {
+		log.Printf("Sleeping %v", time.Duration(config.RunTimeMs-config.RampUpIntervalMs)*time.Millisecond)
 		time.Sleep(time.Duration(config.RunTimeMs-config.RampUpIntervalMs) * time.Millisecond)
-		log.Println("Shutting down clients")
+		log.Printf("Done sleeping.  Shutting down clients")
 	} else {
+		log.Printf("wg.Wait()")
 		wg.Wait()
+		log.Printf("/wg.Wait()")
 	}
 }
 
@@ -129,6 +143,7 @@ func createSession(admin *api.SyncGatewayClient, user *workload.User, config wor
 }
 
 func runUser(user *workload.User, config workload.Config, wg *sync.WaitGroup) {
+	log.Printf("Runuser called with %s (%s)", user.Type, user.Name)
 	c := api.SyncGatewayClient{}
 	c.Init(
 		config.Hostname,
