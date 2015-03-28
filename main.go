@@ -17,9 +17,10 @@ const (
 )
 
 func main() {
-	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	log.Printf("gateload main")
+
+	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	// start up an http server, just to serve up expvars
 	go http.ListenAndServe(":9876", nil)
