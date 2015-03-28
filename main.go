@@ -80,12 +80,12 @@ func main() {
 		}()
 
 		for user := range userIterator {
-			log.Printf("worker %v creating session", workerId)
+			log.Printf("worker %v creating session for user: %v user.seq", workerId, user.Name, user.SeqId)
 			createSession(&admin, user, config)
-			log.Printf("/worker %v created session", workerId)
-			log.Printf("worker %v send to pending users", workerId)
+			log.Printf("/worker %v created session for user: %v", workerId, user.Name)
+			log.Printf("worker %v send %v to pending users", workerId, user.Name)
 			pendingUsers <- user
-			log.Printf("/worker %v sent to pending users", workerId)
+			log.Printf("/worker %v sent %v to pending users", workerId, user.Name)
 		}
 
 	}
