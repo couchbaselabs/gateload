@@ -427,6 +427,8 @@ type UserAuth struct {
 }
 
 func (c *SyncGatewayClient) AddUser(name string, auth UserAuth) {
+	defer log.Printf("/Adding user %s", name)
+
 	b, _ := json.Marshal(auth)
 	j := bytes.NewReader(b)
 	uri := fmt.Sprintf("%s/_user/%s", c.baseAdminURI, name)
