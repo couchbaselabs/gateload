@@ -132,10 +132,10 @@ func (c *RestClient) DoAndIgnore(req *http.Request, opName string) bool {
 	start := time.Now()
 	resp, serialNumber := c.DoRaw(req, opName)
 	if resp == nil {
+		log.Printf("#%05d:      response was nil %v", serialNumber, time.Since(start))
 		return false
 	}
 	defer resp.Body.Close()
-	io.Copy(ioutil.Discard, resp.Body)
 	_, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Panicf("Can't read HTTP response: %v", err)
