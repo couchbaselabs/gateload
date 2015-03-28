@@ -73,8 +73,11 @@ func main() {
 	worker := func(workerId int) {
 		log.Printf("worker %v executing", workerId)
 
-		defer adminWg.Done()
-		defer log.Printf("/worker done %v executing", workerId)
+		defer func() {
+			log.Printf("worker %v call adminWg.Done()", workerId)
+			adminWg.Done()
+			log.Printf("/worker %v call adminWg.Done()", workerId)
+		}()
 
 		for user := range userIterator {
 			log.Printf("worker %v creating session", workerId)
