@@ -45,7 +45,10 @@ func main() {
 
 	// start a routine to place pending users into array
 	go func() {
+
 		for pendingUser := range pendingUsers {
+
+			log.Printf("got pendingUser from chan.  username: %v, user seq: %v", pendingUser.Name, pendingUser.SeqId)
 
 			// users = append(users, pendingUser)
 			users[pendingUser.SeqId-config.UserOffset] = pendingUser
@@ -67,19 +70,27 @@ func main() {
 		config.RunTimeMs,
 	)
 	adminWg := sync.WaitGroup{}
-	worker := func() {
+	worker := func(workerId int) {
+		log.Printf("worker %v executing", workerId)
+
 		defer adminWg.Done()
+		defer log.Printf("/worker done %v executing", workerId)
+
 		for user := range userIterator {
+			log.Printf("worker %v creating session", workerId)
 			createSession(&admin, user, config)
+			log.Printf("/worker %v created session", workerId)
+			log.Printf("worker %v send to pending users", workerId)
 			pendingUsers <- user
+			log.Printf("/worker %v sent to pending users", workerId)
 		}
-		log.Printf("done iterating over all users")
+
 	}
 
 	for i := 0; i < 200; i++ {
 		adminWg.Add(1)
 		log.Printf("kick off go worker %v", i)
-		go worker()
+		go worker(i)
 		log.Printf("/kick off go worker %v", i)
 	}
 
