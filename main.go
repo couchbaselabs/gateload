@@ -19,6 +19,8 @@ const (
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
+	log.Printf("gateload main")
+
 	// start up an http server, just to serve up expvars
 	go http.ListenAndServe(":9876", nil)
 
@@ -70,11 +72,14 @@ func main() {
 			createSession(&admin, user, config)
 			pendingUsers <- user
 		}
+		log.Printf("done iterating over all users")
 	}
 
 	for i := 0; i < 200; i++ {
 		adminWg.Add(1)
+		log.Printf("kick off go worker %v", i)
 		go worker()
+		log.Printf("/kick off go worker %v", i)
 	}
 
 	// wait for all the workers to finish
