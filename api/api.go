@@ -166,7 +166,7 @@ func (c *SyncGatewayClient) Init(hostname, db string, port, adminPort int, verbo
 }
 
 func (c *SyncGatewayClient) Valid() bool {
-	req, _ := http.NewRequest("HEAD", c.baseAdminURI, nil)
+	req, _ := http.NewRequest("GET", c.baseAdminURI, nil)
 	resp, _ := c.client.DoRaw(req, "")
 	return resp != nil
 }
