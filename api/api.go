@@ -160,10 +160,7 @@ func (c *SyncGatewayClient) Init(hostname, db string, port, adminPort int, verbo
 	c.baseAdminURI = fmt.Sprintf("http://%s:%d/%s", hostname, adminPort, db)
 	t := &http.Transport{MaxIdleConnsPerHost: MaxIdleConnsPerHost}
 	c.client = &RestClient{
-		client: &http.Client{
-			Transport: t,
-			Timeout:   time.Duration(5 * time.Second),
-		},
+		client:  &http.Client{Transport: t},
 		Verbose: verbose,
 	}
 }

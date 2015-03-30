@@ -90,7 +90,7 @@ func main() {
 
 	}
 
-	for i := 0; i < 200; i++ {
+	for i := 0; i < 1; i++ {
 		adminWg.Add(1)
 		log.Printf("kick off go worker %v", i)
 		go worker(i)
