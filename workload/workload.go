@@ -23,10 +23,10 @@ var kPercentileNames = []string{"p50", "p75", "p90", "p95", "p99"}
 var glExpvars = expvar.NewMap("gateload")
 
 var (
-	GlConfig  *Config
+	GlConfig          *Config
 	statsdQuitChannel chan struct{}
-	opshistos = map[string]metrics.Histogram{}
-	histosMu  = sync.Mutex{}
+	opshistos         = map[string]metrics.Histogram{}
+	histosMu          = sync.Mutex{}
 
 	expOpsHistos *expvar.Map
 
@@ -517,9 +517,8 @@ func StartStatsdClient() {
 			// If nothing is listening on the target port, an error is returned and
 			// the returned client does nothing but is still usable. So we can
 			// just log the error and go on.
-			log.Print(err)
+			log.Printf("ERROR Connecting to statsd server: %v", err)
 		}
-		defer c.Close()
 
 		ticker := time.NewTicker(1 * time.Second)
 		statsdQuitChannel := make(chan struct{})
@@ -529,20 +528,22 @@ func StartStatsdClient() {
 				select {
 				case <-ticker.C:
 					glExpvars.Do(func(f expvar.KeyValue) {
-						log.Printf("Processing glExpvar key: %v, for Type %T", f.Key, f.Value)
 						switch v := f.Value.(type) {
 						case *expvar.Int:
-							c.Gauge(f.Key,v)
+							i, err := strconv.Atoi(v.String())
+							if err == nil {
+								c.Gauge(f.Key, i)
+							} else {
+								log.Printf("Error converting expvarInt key: %v, value %v", f.Key, v)
+							}
 						case *expvar.Map:
 							v.Do(func(g expvar.KeyValue) {
-								log.Printf("Processing expvar.Map key: %v, for Type %T", g.Key, g.Value)
-
 								switch w := g.Value.(type) {
 								case *metrics.HistogramExport:
 									perc := w.Histogram.Percentiles(kStatsPercentiles)
 									for i, p := range perc {
-										log.Printf("Processing percentile key: %v, vale: %v", f.Key+"."+g.Key+"."+kPercentileNames[i], p)
-										c.Gauge(kPercentileNames[i], p)
+										compositeKey := f.Key + "." + g.Key + "." + kPercentileNames[i]
+										c.Gauge(compositeKey, p)
 									}
 								}
 							})
@@ -550,6 +551,7 @@ func StartStatsdClient() {
 					})
 				case <-statsdQuitChannel:
 					ticker.Stop()
+					c.Close()
 					return
 				}
 			}
