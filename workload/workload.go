@@ -522,7 +522,7 @@ func StartStatsdClient() {
 		defer c.Close()
 
 		ticker := time.NewTicker(1 * time.Second)
-		statsdQuitChannel := make(chan struct{})
+		statsdQuitChannel = make(chan struct{})
 		//Iterate over expvars and write to statsd client
 		go func() {
 			for {

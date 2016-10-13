@@ -37,7 +37,6 @@ func main() {
 	workload.ReadConfig()
 
 	workload.StartStatsdClient()
-	defer workload.StopStatsdClient()
 
 	admin := api.SyncGatewayClient{}
 	admin.Init(
@@ -126,7 +125,7 @@ func main() {
 
 	workload.ValidateExpvars()
 	writeExpvarsToFile()
-
+	workload.StopStatsdClient()
 }
 
 func createSession(admin *api.SyncGatewayClient, user *workload.User, config workload.Config) {
