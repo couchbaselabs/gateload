@@ -519,7 +519,6 @@ func StartStatsdClient() {
 			// just log the error and go on.
 			log.Print(err)
 		}
-		defer c.Close()
 
 		ticker := time.NewTicker(1 * time.Second)
 		statsdQuitChannel = make(chan struct{})
@@ -529,20 +528,20 @@ func StartStatsdClient() {
 				select {
 				case <-ticker.C:
 					glExpvars.Do(func(f expvar.KeyValue) {
-						log.Printf("Processing glExpvar key: %v, for Type %T", f.Key, f.Value)
+						//log.Printf("Processing glExpvar key: %v, for Type %T", f.Key, f.Value)
 						switch v := f.Value.(type) {
 						case *expvar.Int:
 							c.Gauge(f.Key,v)
 						case *expvar.Map:
 							v.Do(func(g expvar.KeyValue) {
-								log.Printf("Processing expvar.Map key: %v, for Type %T", g.Key, g.Value)
-
+								//log.Printf("Processing expvar.Map key: %v, for Type %T", g.Key, g.Value)
 								switch w := g.Value.(type) {
 								case *metrics.HistogramExport:
 									perc := w.Histogram.Percentiles(kStatsPercentiles)
 									for i, p := range perc {
-										log.Printf("Processing percentile key: %v, vale: %v", f.Key+"."+g.Key+"."+kPercentileNames[i], p)
-										c.Gauge(kPercentileNames[i], p)
+										compositeKey := f.Key+"."+g.Key+"."+kPercentileNames[i]
+										log.Printf("Processing percentile key: %v, vale: %v", compositeKey, p)
+										c.Gauge(compositeKey, p)
 									}
 								}
 							})
@@ -550,6 +549,7 @@ func StartStatsdClient() {
 					})
 				case <-statsdQuitChannel:
 					ticker.Stop()
+					c.Close()
 					return
 				}
 			}
