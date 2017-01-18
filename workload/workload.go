@@ -531,7 +531,11 @@ func StartStatsdClient() {
 						//log.Printf("Processing glExpvar key: %v, for Type %T", f.Key, f.Value)
 						switch v := f.Value.(type) {
 						case *expvar.Int:
-							c.Gauge(f.Key,v)
+							i, err := strconv.ParseInt(v.String(), 10, 64)
+							log.Printf("Processing root key: %v, vale: %v", f.Key, i)
+							if err == nil {
+								c.Gauge(f.Key,i)
+							}
 						case *expvar.Map:
 							v.Do(func(g expvar.KeyValue) {
 								//log.Printf("Processing expvar.Map key: %v, for Type %T", g.Key, g.Value)
