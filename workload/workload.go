@@ -528,23 +528,19 @@ func StartStatsdClient() {
 				select {
 				case <-ticker.C:
 					glExpvars.Do(func(f expvar.KeyValue) {
-						//log.Printf("Processing glExpvar key: %v, for Type %T", f.Key, f.Value)
 						switch v := f.Value.(type) {
 						case *expvar.Int:
 							i, err := strconv.ParseInt(v.String(), 10, 64)
-							log.Printf("Processing root key: %v, vale: %v", f.Key, i)
 							if err == nil {
 								c.Gauge(f.Key,i)
 							}
 						case *expvar.Map:
 							v.Do(func(g expvar.KeyValue) {
-								//log.Printf("Processing expvar.Map key: %v, for Type %T", g.Key, g.Value)
 								switch w := g.Value.(type) {
 								case *metrics.HistogramExport:
 									perc := w.Histogram.Percentiles(kStatsPercentiles)
 									for i, p := range perc {
 										compositeKey := f.Key+"."+g.Key+"."+kPercentileNames[i]
-										log.Printf("Processing percentile key: %v, vale: %v", compositeKey, p)
 										c.Gauge(compositeKey, p)
 									}
 								}
