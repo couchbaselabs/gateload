@@ -23,10 +23,10 @@ var kPercentileNames = []string{"p50", "p75", "p90", "p95", "p99"}
 var glExpvars = expvar.NewMap("gateload")
 
 var (
-	GlConfig  *Config
+	GlConfig          *Config
 	statsdQuitChannel chan struct{}
-	opshistos = map[string]metrics.Histogram{}
-	histosMu  = sync.Mutex{}
+	opshistos         = map[string]metrics.Histogram{}
+	histosMu          = sync.Mutex{}
 
 	expOpsHistos *expvar.Map
 
@@ -427,7 +427,7 @@ outer:
 				Log("new wakeup time %v", wakeupTime)
 
 				// transitioning on, start a changes feed
-				changesFeed, cancelChangesFeed, changesResponse = c.GetChangesFeed(feedType, lastSeq)
+				changesFeed, cancelChangesFeed, changesResponse = c.GetChangesFeed(feedType, lastSeq, wakeupTime)
 				Log("** Puller %s watching changes using %s feed...", name, feedType)
 			}
 		case change, ok := <-changesFeed:
@@ -532,7 +532,7 @@ func StartStatsdClient() {
 						case *expvar.Int:
 							i, err := strconv.ParseInt(v.String(), 10, 64)
 							if err == nil {
-								c.Gauge(f.Key,i)
+								c.Gauge(f.Key, i)
 							}
 						case *expvar.Map:
 							v.Do(func(g expvar.KeyValue) {
@@ -540,7 +540,7 @@ func StartStatsdClient() {
 								case *metrics.HistogramExport:
 									perc := w.Histogram.Percentiles(kStatsPercentiles)
 									for i, p := range perc {
-										compositeKey := f.Key+"."+g.Key+"."+kPercentileNames[i]
+										compositeKey := f.Key + "." + g.Key + "." + kPercentileNames[i]
 										c.Gauge(compositeKey, p)
 									}
 								}

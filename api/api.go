@@ -314,6 +314,14 @@ func logPushToSubscriberTime(createdTime *time.Time, wakeup time.Time) {
 	}
 }
 
+func logChangesPushToSubscriberTime(createdTime *time.Time, wakeup time.Time) {
+	if wakeup.After(*createdTime) {
+		OperationCallback("ChangesPushToSubscriberBackfill", wakeup, nil)
+	} else {
+		OperationCallback("ChangesPushToSubscriberInteractive", *createdTime, nil)
+	}
+}
+
 // no longer used due to https://github.com/couchbase/sync_gateway/issues/1159#issuecomment-142731185
 func (c *SyncGatewayClient) GetLastSeq() float64 {
 	uri := fmt.Sprintf("%s/", c.baseURI)
@@ -349,7 +357,7 @@ func (c *SyncGatewayClient) changesFeedRequest(feedType, since interface{}) *htt
 	return req
 }
 
-func (c *SyncGatewayClient) GetChangesFeed(feedType string, since interface{}) (<-chan *Change, *bool, *http.Response) {
+func (c *SyncGatewayClient) GetChangesFeed(feedType string, since interface{}, wakeup time.Time) (<-chan *Change, *bool, *http.Response) {
 	if feedType == "continuous" {
 		return c.runContinuousChangesFeed(since)
 	}
@@ -371,6 +379,11 @@ func (c *SyncGatewayClient) GetChangesFeed(feedType string, since interface{}) (
 					revID := dict["rev"].(string)
 					change.Changes = append(change.Changes, ChangeRev{Rev: revID})
 				}
+				createdTime := createdTimeFromDocId(change.ID)
+				if createdTime != nil {
+					logChangesPushToSubscriberTime(createdTime, wakeup)
+				}
+
 				out <- &change
 			}
 			since = feed["last_seq"]
