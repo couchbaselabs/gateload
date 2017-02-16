@@ -359,7 +359,7 @@ func (c *SyncGatewayClient) changesFeedRequest(feedType, since interface{}) *htt
 
 func (c *SyncGatewayClient) GetChangesFeed(feedType string, since interface{}, wakeup time.Time) (<-chan *Change, *bool, *http.Response) {
 	if feedType == "continuous" {
-		return c.runContinuousChangesFeed(since)
+		return c.runContinuousChangesFeed(since, wakeup)
 	}
 
 	out := make(chan *Change)
@@ -383,7 +383,6 @@ func (c *SyncGatewayClient) GetChangesFeed(feedType string, since interface{}, w
 				if createdTime != nil {
 					logChangesPushToSubscriberTime(createdTime, wakeup)
 				}
-
 				out <- &change
 			}
 			since = feed["last_seq"]
@@ -398,7 +397,7 @@ func (c *SyncGatewayClient) GetChangesFeed(feedType string, since interface{}, w
 	return out, &running, nil
 }
 
-func (c *SyncGatewayClient) runContinuousChangesFeed(since interface{}) (<-chan *Change, *bool, *http.Response) {
+func (c *SyncGatewayClient) runContinuousChangesFeed(since interface{}, wakeup time.Time) (<-chan *Change, *bool, *http.Response) {
 	running := true
 	response, _ := c.client.DoRaw(c.changesFeedRequest("continuous", since), "")
 	if response == nil {
@@ -415,6 +414,10 @@ func (c *SyncGatewayClient) runContinuousChangesFeed(since interface{}) (<-chan 
 				if err := json.Unmarshal(line, &change); err != nil {
 					log.Printf("Warning: Unparseable line from continuous _changes: %s", scanner.Bytes())
 					continue
+				}
+				createdTime := createdTimeFromDocId(change.ID)
+				if createdTime != nil {
+					logChangesPushToSubscriberTime(createdTime, wakeup)
 				}
 				out <- &change
 			}
