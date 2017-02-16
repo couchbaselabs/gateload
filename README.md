@@ -1,4 +1,4 @@
-[![Build Status](https://drone.io/github.com/couchbaselabs/gateload/status.png)](https://drone.io/github.com/couchbaselabs/gateload/latest)
+[![Build Status](http://drone.couchbase.io/api/badges/couchbaselabs/gateload/status.svg)](http://drone.couchbase.io/couchbaselabs/gateload)
 
 gateload
 --------
