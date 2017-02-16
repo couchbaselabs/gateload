@@ -1,4 +1,3 @@
-[![Build Status](http://drone.couchbase.io/api/badges/couchbaselabs/gateload/status.svg)](http://drone.couchbase.io/couchbaselabs/gateload)
 
 gateload
 --------
