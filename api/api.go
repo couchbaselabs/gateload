@@ -318,7 +318,7 @@ func logPushToSubscriberTime(createdTime *time.Time, wakeup time.Time) {
 		if StatsdClient != nil {
 			duration := time.Since(wakeup)
 			StatsdClient.Timing("PushToSubscriberBackfill", float64(duration))
-			log.Printf("Add statsd timing PushToSubscriberBackfill: %d", float64(duration))
+			log.Printf("Add statsd timing PushToSubscriberBackfill: %v", float64(duration))
 		}
 
 
@@ -326,9 +326,9 @@ func logPushToSubscriberTime(createdTime *time.Time, wakeup time.Time) {
 	} else {
 		OperationCallback("PushToSubscriberInteractive", *createdTime, nil)
 		if StatsdClient != nil {
-			duration := time.Since(wakeup)
+			duration := time.Since(*createdTime)
 			StatsdClient.Timing("PushToSubscriberInteractive", float64(duration))
-			log.Printf("Add statsd timing PushToSubscriberInteractive: %d", float64(duration))
+			log.Printf("Add statsd timing PushToSubscriberInteractive: %v", float64(duration))
 		}
 	}
 
