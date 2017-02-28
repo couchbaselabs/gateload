@@ -343,7 +343,7 @@ func logPushToSubscriberTime(createdTime *time.Time, wakeup time.Time) {
 				"PushToSubscriberBackfill",
 				duration,
 			)
-			log.Printf("Add statsd timing PushToSubscriberBackfill: %v", float64(duration))
+			log.Printf("Add statsd timing PushToSubscriberBackfill: %v", duration)
 		}
 
 
@@ -357,7 +357,7 @@ func logPushToSubscriberTime(createdTime *time.Time, wakeup time.Time) {
 				"PushToSubscriberInteractive",
 				duration,
 			)
-			log.Printf("Add statsd timing PushToSubscriberInteractive: %v", float64(duration))
+			log.Printf("Add statsd timing PushToSubscriberInteractive: %v", duration)
 		}
 	}
 
