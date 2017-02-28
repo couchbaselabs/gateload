@@ -315,12 +315,12 @@ func logPushToSubscriberTime(createdTime *time.Time, wakeup time.Time) {
 	if wakeup.After(*createdTime) {
 		OperationCallback("PushToSubscriberBackfill", wakeup, nil)
 		duration := time.Since(wakeup)
-		StatsdClient.Timing("PushToSubscriberBackfill", duration)
+		StatsdClient.Timing("PushToSubscriberBackfill", float64(duration))
 
 	} else {
 		OperationCallback("PushToSubscriberInteractive", *createdTime, nil)
 		duration := time.Since(wakeup)
-		StatsdClient.Timing("PushToSubscriberInteractive", duration)
+		StatsdClient.Timing("PushToSubscriberInteractive", float64(duration))
 	}
 
 }
