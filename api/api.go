@@ -13,6 +13,9 @@ import (
 	"strings"
 	"sync/atomic"
 	"time"
+
+	"gopkg.in/alexcesaro/statsd.v2"
+
 )
 
 type RestClient struct {
@@ -24,6 +27,8 @@ type RestClient struct {
 }
 
 var OperationCallback func(op string, start time.Time, err error)
+
+var StatsdClient *statsd.Client
 
 var lastSerialNumber uint64
 
@@ -309,9 +314,15 @@ func createdTimeFromDocId(docid string) *time.Time {
 func logPushToSubscriberTime(createdTime *time.Time, wakeup time.Time) {
 	if wakeup.After(*createdTime) {
 		OperationCallback("PushToSubscriberBackfill", wakeup, nil)
+		duration := time.Since(wakeup)
+		StatsdClient.Timing("PushToSubscriberBackfill", duration)
+
 	} else {
 		OperationCallback("PushToSubscriberInteractive", *createdTime, nil)
+		duration := time.Since(wakeup)
+		StatsdClient.Timing("PushToSubscriberInteractive", duration)
 	}
+
 }
 
 func logChangesPushToSubscriberTime(createdTime *time.Time, wakeup time.Time) {

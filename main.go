@@ -36,7 +36,10 @@ func main() {
 
 	workload.ReadConfig()
 
-	workload.StartStatsdClient()
+	statsdClient := workload.StartStatsdClient()
+	if statsdClient != nil {
+		api.StatsdClient = statsdClient
+	}
 
 	admin := api.SyncGatewayClient{}
 	admin.Init(
