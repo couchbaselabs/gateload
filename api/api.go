@@ -314,13 +314,22 @@ func createdTimeFromDocId(docid string) *time.Time {
 func logPushToSubscriberTime(createdTime *time.Time, wakeup time.Time) {
 	if wakeup.After(*createdTime) {
 		OperationCallback("PushToSubscriberBackfill", wakeup, nil)
-		duration := time.Since(wakeup)
-		StatsdClient.Timing("PushToSubscriberBackfill", float64(duration))
+
+		if StatsdClient != nil {
+			duration := time.Since(wakeup)
+			StatsdClient.Timing("PushToSubscriberBackfill", float64(duration))
+			log.Printf("Add statsd timing PushToSubscriberBackfill: %d", float64(duration))
+		}
+
+
 
 	} else {
 		OperationCallback("PushToSubscriberInteractive", *createdTime, nil)
-		duration := time.Since(wakeup)
-		StatsdClient.Timing("PushToSubscriberInteractive", float64(duration))
+		if StatsdClient != nil {
+			duration := time.Since(wakeup)
+			StatsdClient.Timing("PushToSubscriberInteractive", float64(duration))
+			log.Printf("Add statsd timing PushToSubscriberInteractive: %d", float64(duration))
+		}
 	}
 
 }
