@@ -14,7 +14,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"gopkg.in/alexcesaro/statsd.v2"
+	"github.com/peterbourgon/g2s"
 
 )
 
@@ -28,9 +28,30 @@ type RestClient struct {
 
 var OperationCallback func(op string, start time.Time, err error)
 
-var StatsdClient *statsd.Client
 
-var lastSerialNumber uint64
+var (
+	// The sample rate -- set this to 0.1 if you only want
+	// 10% of the samples to be pushed to statds, or .01 if you only
+	// want 1% of the samples pushed to statsd.  Useful for
+	// not overwhelming stats if you have too many samples.
+	statsdSampleRate float32 = 1.0
+
+	lastSerialNumber uint64
+
+	StatsdClient *g2s.Statsd
+
+)
+
+
+func StartStatsdClient(endpoint string) {
+
+	var err error
+	StatsdClient, err = g2s.DialWithPrefix("udp", endpoint, "gateload_stats")
+	if err != nil {
+		panic(fmt.Sprintf("Error connecting to statsd"))
+	}
+
+}
 
 func (c *RestClient) DoRaw(req *http.Request, opName string) (resp *http.Response, serialNumber uint64) {
 	defer func() {
@@ -317,7 +338,11 @@ func logPushToSubscriberTime(createdTime *time.Time, wakeup time.Time) {
 
 		if StatsdClient != nil {
 			duration := time.Since(wakeup)
-			StatsdClient.Timing("PushToSubscriberBackfill", float64(duration))
+			StatsdClient.Timing(
+				statsdSampleRate,
+				"PushToSubscriberBackfill",
+				duration,
+			)
 			log.Printf("Add statsd timing PushToSubscriberBackfill: %v", float64(duration))
 		}
 
@@ -327,7 +352,11 @@ func logPushToSubscriberTime(createdTime *time.Time, wakeup time.Time) {
 		OperationCallback("PushToSubscriberInteractive", *createdTime, nil)
 		if StatsdClient != nil {
 			duration := time.Since(*createdTime)
-			StatsdClient.Timing("PushToSubscriberInteractive", float64(duration))
+			StatsdClient.Timing(
+				statsdSampleRate,
+				"PushToSubscriberInteractive",
+				duration,
+			)
 			log.Printf("Add statsd timing PushToSubscriberInteractive: %v", float64(duration))
 		}
 	}
