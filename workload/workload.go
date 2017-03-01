@@ -512,7 +512,7 @@ func StartStatsdClient() *statsd.Client {
 		// goroutines, based on fact that connection returned from Dial
 		log.Printf("Creating statsd client")
 
-			c, err := statsd.New(statsd.Prefix("gateload_stats"), statsd.Address(GlConfig.StatsdEndpoint))
+		c, err := statsd.New(statsd.Prefix("gateload_stats"), statsd.Address(GlConfig.StatsdEndpoint))
 		if err != nil {
 			// If nothing is listening on the target port, an error is returned and
 			// the returned client does nothing but is still usable. So we can

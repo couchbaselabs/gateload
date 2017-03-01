@@ -222,4 +222,3 @@ func writeExpvarsToFile() {
 	log.Printf("Wrote results to %v", destFileName)
 
 }
-
