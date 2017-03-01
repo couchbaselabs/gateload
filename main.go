@@ -38,6 +38,10 @@ func main() {
 
 	workload.StartStatsdClient()
 
+	if workload.GlConfig.StatsdEnabled {
+		api.StartStatsdClient(workload.GlConfig.StatsdEndpoint)
+	}
+
 	admin := api.SyncGatewayClient{}
 	admin.Init(
 		workload.GlConfig.Hostname,
@@ -218,4 +222,3 @@ func writeExpvarsToFile() {
 	log.Printf("Wrote results to %v", destFileName)
 
 }
-

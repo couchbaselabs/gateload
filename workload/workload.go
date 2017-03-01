@@ -504,7 +504,7 @@ func ValidateExpvars() {
 
 }
 
-func StartStatsdClient() {
+func StartStatsdClient() *statsd.Client {
 	log.Printf("startStatsdClient() called")
 
 	if GlConfig.StatsdEnabled {
@@ -554,7 +554,11 @@ func StartStatsdClient() {
 				}
 			}
 		}()
+
+		return c
 	}
+
+	return nil
 }
 
 func StopStatsdClient() {
