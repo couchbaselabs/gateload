@@ -2,7 +2,7 @@
 gateload
 --------
 
-Sync Gateway workload generator
+Sync Gateway workload generator.  Intended to be replaced by [sgload](https://github.com/couchbaselabs/sgload) - work in progress.
 
 Install
 -------
